@@ -3,11 +3,11 @@ package io.spring.initializr.i7boot;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import io.spring.initializr.generator.ProjectRequest;
+import org.springframework.core.io.ClassPathResource;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -66,13 +66,7 @@ public class ProjectConstructGenerateContext extends ProjectRequest {
         context.setPackageName(request.getPackageName());
         context.setJavaVersion(request.getJavaVersion());
         context.setBaseDir(request.getBaseDir());
-        Configuration configuration = new Configuration();
-        try {
-            configuration.setDirectoryForTemplateLoading(new File("src/main/resources/templates/i7boot"));
-            context.setConfiguration(configuration);
-        } catch (IOException e) {
-            throw new IllegalStateException("create context error");
-        }
+        context.setConfiguration(new Configuration());
         context.getTemplateData().putAll(model);
         return context;
     }
@@ -84,7 +78,8 @@ public class ProjectConstructGenerateContext extends ProjectRequest {
      */
     public void generateWithTemplate(String moduleTemplateDir, Map<String, String> generateInfos) {
         try {
-            configuration.setDirectoryForTemplateLoading(Paths.get(TEMPLATE_PARENT_DIR, moduleTemplateDir).toFile());
+            ClassPathResource cpr = new ClassPathResource(moduleTemplateDir);
+            configuration.setDirectoryForTemplateLoading(cpr.getFile());
             BufferedWriter out = null;
             for (Map.Entry<String, String> generateInfo : generateInfos.entrySet()) {
                 try {
